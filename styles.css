@@ -1,151 +1,349 @@
+/* ===========================================================
+   Kanto Nerd — Jogo da Memória (layout 100% responsivo)
+   =========================================================== */
+
+/* ====== Tema & tokens ====== */
 :root{
-  --bg:#0b0c14; --fg:#E8ECF1; --muted:#A9B3C1;
-  --accent:#e53935; --front1:#1b1f2f; --front2:#0f1322;
+  /* Paleta (pode trocar futuramente) */
+  --bg:#0b0c14; 
+  --fg:#E8ECF1; 
+  --muted:#A9B3C1;
+  --accent:#e53935;
+  --front1:#1b1f2f; 
+  --front2:#0f1322;
   --border:rgba(255,255,255,.08);
-  --card: 160px;      /* JS recalcula para preencher a tela */
+
+  /* Layout */
+  --card: 160px;          /* JS recalcula para preencher a tela */
   --gap: 18px;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --shadow-md: 0 10px 16px rgba(0,0,0,.35);
+  --safe-pad: env(safe-area-inset-bottom, 0px);
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,Segoe UI,Roboto,Montserrat,Arial;min-height:100vh;display:flex;flex-direction:column}
-.topbar{position:relative;display:flex;justify-content:flex-start;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#14182a,#0c1020)}
-.brand{display:flex;gap:12px;align-items:center}
-.logo{width:56px;height:56px;border-radius:12px;border:1px solid var(--border);object-fit:cover}
-.controls{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:10px}
-.btn{padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--front1);color:var(--fg);cursor:pointer}
-.btn.primary{background:var(--accent);border-color:#ff6b66;color:#fff}
 
-/* Grid responsivo com dois estados */
-.wrap{width:100%;max-width:1900px;margin:16px auto;padding:0 16px;display:grid;gap:22px;align-items:start;
-  grid-template-columns: 1fr; grid-template-areas:
-  "hud"
-  "ranking"
-  "board";}
-.wrap.ingame{grid-template-columns: minmax(720px,1fr) 520px; grid-template-areas:
-  "hud hud"
-  "board ranking";}
-.hud{grid-area:hud; display:flex;gap:28px;justify-content:center;color:var(--muted)}
+*{ box-sizing:border-box }
+html,body{ height:100% }
 
-/* Tabuleiro */
-.board-wrap{grid-area:board; min-height:calc(100vh - 260px);position:relative;display:flex;justify-content:center}
-.wrap.ingame .board-wrap{ min-height:calc(100vh - 300px); }
-.board{display:grid;gap:var(--gap);justify-content:center}
-.card{width:var(--card);height:var(--card);perspective:800px;border-radius:18px;cursor:pointer}
-.inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
-.flipped .inner{transform:rotateY(180deg)}
-.face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:18px;backface-visibility:hidden}
-.front{background:linear-gradient(180deg,var(--front1),var(--front2));position:relative}
-.front .kanto-badge{position:absolute;top:10px;left:10px;font-size:1rem;color:#fff;background:rgba(229,57,53,.6);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:3px 7px}
-.back{transform:rotateY(180deg);background:radial-gradient(170px 110px at 50% 15%, rgba(229,57,53,.25), transparent 60%)}
-.icon{width:86%;height:86%;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.35))}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font:16px/1.4 system-ui,Segoe UI,Roboto,Montserrat,Arial;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
 
-/* Vitória */
-.win{position:absolute;inset:0;background:rgba(0,0,0,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:18px}
-.win.hidden{display:none}
+/* ====== Topo (agora responsivo de verdade) ====== */
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap; /* quebra com elegância no mobile */
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,#14182a,#0c1020);
+}
 
-/* Ranking — card base */
-#rankingBox{ grid-area: ranking; }
-.ranking-centered{max-width:980px;margin:0 auto;border:1px solid var(--border);border-radius:18px;padding:18px;background:linear-gradient(180deg,#12182b,#0d111f)}
-.ranking-centered table{ width:100%; border-collapse:collapse }
-.ranking-centered th,.ranking-centered td{border-bottom:1px solid var(--border);padding:10px;text-align:center;line-height:1.15}
-.ranking-centered th{color:#32b1ff}
-.ranking-centered tbody tr:nth-child(even){background:rgba(255,255,255,.02)}
+.brand{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  min-width:0; /* permite truncar texto se precisar */
+}
+.logo{
+  width:56px; height:56px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  object-fit:cover;
+}
+.brand h1{
+  margin:0;
+  font-size:clamp(18px,5vw,28px);
+  line-height:1.1;
+}
+.brand small{
+  display:block;
+  font-size:clamp(12px,3.6vw,14px);
+  opacity:.85;
+}
 
-/* Título do ranking: bom em topo e em sidebar */
+/* Botões sem position:absolute; alinham e quebram linha */
+.controls{
+  margin-left:auto;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.btn{
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--front1);
+  color:var(--fg);
+  cursor:pointer;
+  min-height:36px;
+  transition:transform .08s ease, filter .2s ease, background .2s ease;
+}
+.btn.primary{ background:var(--accent); border-color:#ff6b66; color:#fff }
+.btn:hover{ filter:brightness(1.07) }
+.btn:active{ transform:translateY(1px) }
+.btn:focus-visible{ outline:2px solid #32b1ff; outline-offset:2px }
+
+/* ====== Grid de página ====== */
+.wrap{
+  width:100%;
+  max-width:1900px;
+  margin:16px auto;
+  padding:0 16px 16px;
+  display:grid;
+  gap:22px;
+  align-items:start;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "hud"
+    "ranking"
+    "board";
+}
+.wrap.ingame{
+  grid-template-columns: minmax(720px,1fr) 520px;
+  grid-template-areas:
+    "hud hud"
+    "board ranking";
+}
+
+/* ====== HUD ====== */
+.hud{
+  grid-area:hud;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 18px;
+  justify-content:center;
+  color:var(--muted);
+}
+.hud span{ white-space:nowrap }
+
+/* ====== Tabuleiro ====== */
+.board-wrap{
+  grid-area:board;
+  min-height:calc(100vh - 260px);
+  position:relative;
+  display:flex;
+  justify-content:center;
+  padding:12px;
+}
+.wrap.ingame .board-wrap{ min-height:calc(100vh - 300px) }
+
+.board{ display:grid; gap:var(--gap); justify-content:center }
+
+.card{
+  width:var(--card);
+  height:var(--card);
+  perspective:800px;
+  border-radius:var(--radius-lg);
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.inner{
+  position:relative;
+  width:100%; height:100%;
+  transition:transform .5s;
+  transform-style:preserve-3d;
+}
+.flipped .inner{ transform:rotateY(180deg) }
+
+.face{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  backface-visibility:hidden;
+}
+.front{
+  background:linear-gradient(180deg,var(--front1),var(--front2));
+  position:relative;
+}
+.front .kanto-badge{
+  position:absolute; top:10px; left:10px;
+  font-size:1rem; color:#fff;
+  background:rgba(229,57,53,.6);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;
+  padding:3px 7px;
+}
+.back{
+  transform:rotateY(180deg);
+  background:radial-gradient(170px 110px at 50% 15%, rgba(229,57,53,.25), transparent 60%);
+}
+.icon{
+  width:86%; height:86%;
+  object-fit:contain;
+  filter:drop-shadow(var(--shadow-md));
+}
+
+/* ====== Tela de vitória ====== */
+.win{
+  position:absolute; inset:0;
+  background:rgba(0,0,0,.75);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  border-radius:var(--radius-lg);
+  text-align:center;
+  padding:20px;
+}
+.win.hidden{ display:none }
+.win h2{
+  margin:0 0 8px 0;
+  font-size:clamp(20px, 4.5vw, 28px);
+  color:#6DFF7A; /* verde vitória */
+}
+.win p#winStats{ color:var(--muted); margin:0 0 12px 0 }
+
+/* ====== Ranking ====== */
+#rankingBox{ grid-area:ranking }
+.ranking-centered{
+  max-width:980px; margin:0 auto;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:18px;
+  background:linear-gradient(180deg,#12182b,#0d111f);
+}
 .ranking-centered h2{
   margin:0 0 10px 0;
   font-size: clamp(20px, 2.2vw, 24px);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-align:center;
 }
-.wrap.ingame .ranking-centered h2{
-  font-size: clamp(16px, 1.6vw, 18px); /* título menor na lateral */
+.ranking-centered table{ width:100%; border-collapse:collapse }
+.ranking-centered th, .ranking-centered td{
+  border-bottom:1px solid var(--border);
+  padding:10px; text-align:center; line-height:1.15;
 }
+.ranking-centered th{ color:#32b1ff }
 
-/* Sidebar (segunda parte): trava layout e evita vazamentos */
-.wrap.ingame .ranking-centered{ max-width:100%; margin:0; }
-.wrap.ingame .ranking-centered table{
-  font-size: 13px;        /* tamanho base das células */
-}
-.wrap.ingame .ranking-centered th,
-.wrap.ingame .ranking-centered td{
-  padding: 6px 8px;       /* compacta as linhas */
-  line-height: 1.2;       /* deixa mais “justo” sem perder leitura */
-}
-/* Colunas estreitas */
+/* Zebra */
+.ranking-centered tbody tr:nth-child(even){ background:rgba(255,255,255,.02) }
+
+/* Versão sidebar (quando .wrap.ingame) */
+.wrap.ingame .ranking-centered{ max-width:100%; margin:0 }
+.wrap.ingame .ranking-centered table{ font-size:13px }
+.wrap.ingame .ranking-centered th, .wrap.ingame .ranking-centered td{ padding:6px 8px; line-height:1.2 }
+
+/* Larguras compactas por coluna na sidebar */
 .wrap.ingame .ranking-centered th:nth-child(1),
-.wrap.ingame .ranking-centered td:nth-child(1){ width: 6ch; }   /* # */
+.wrap.ingame .ranking-centered td:nth-child(1){ width: 6ch }   /* # */
 .wrap.ingame .ranking-centered th:nth-child(3),
-.wrap.ingame .ranking-centered td:nth-child(3){ width: 10ch; }  /* Pontuação */
+.wrap.ingame .ranking-centered td:nth-child(3){ width:10ch }  /* Pontuação */
 .wrap.ingame .ranking-centered th:nth-child(4),
-.wrap.ingame .ranking-centered td:nth-child(4){ width: 8ch; }   /* Tempo */
+.wrap.ingame .ranking-centered td:nth-child(4){ width: 8ch }  /* Tempo */
 .wrap.ingame .ranking-centered th:nth-child(5),
-.wrap.ingame .ranking-centered td:nth-child(5){ width: 7ch; }   /* Mov */
+.wrap.ingame .ranking-centered td:nth-child(5){ width: 7ch }  /* Mov */
 .wrap.ingame .ranking-centered th:nth-child(6),
-.wrap.ingame .ranking-centered td:nth-child(6){ width: 8ch; }   /* Dificuldade */
+.wrap.ingame .ranking-centered td:nth-child(6){ width: 8ch }  /* Dificuldade */
 .wrap.ingame .ranking-centered th:nth-child(7),
-.wrap.ingame .ranking-centered td:nth-child(7){ width: 8ch; }   /* Data */
+.wrap.ingame .ranking-centered td:nth-child(7){ width: 8ch }  /* Data */
 
-/* Coluna Nome: ocupa o resto e trunca com reticências */
+/* Coluna nome ocupa o resto e trunca */
 .wrap.ingame .ranking-centered th:nth-child(2),
-.wrap.ingame .ranking-centered td:nth-child(2){ width:auto; }
+.wrap.ingame .ranking-centered td:nth-child(2){ width:auto }
 .wrap.ingame .ranking-centered td:nth-child(2){
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:middle;
 }
 
-/* Rodapé */
-.footer{margin-top:auto;text-align:center;color:var(--muted);padding:18px}
+/* Scroll horizontal seguro no mobile */
+.ranking-centered table{
+  display:block; max-width:100%;
+  overflow-x:auto; white-space:nowrap;
+  border-collapse:separate; border-spacing:0;
+}
 
-/* Modal centralizado */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:12px;z-index:1000}
-.modal.show{display:flex}
-.modal-box{width:min(520px,calc(100% - 24px));background:#0f1322;border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
-.modal-box h3{margin:0 0 8px 0}
-.modal-box input,.modal-box select{background:#12182b;border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--fg)}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
+/* ====== Rodapé ====== */
+.footer{
+  margin-top:auto;
+  text-align:center;
+  color:var(--muted);
+  padding:18px calc(16px + env(safe-area-inset-left,0)) calc(18px + var(--safe-pad)) calc(16px + env(safe-area-inset-right,0));
+}
 
-/* Responsivo: em telas estreitas volta para 1 coluna */
+/* ====== Modal ====== */
+.modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:none; align-items:center; justify-content:center;
+  padding:12px; z-index:1000;
+}
+.modal.show{ display:flex }
+.modal-box{
+  width:min(520px,calc(100% - 24px));
+  background:#0f1322;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.modal-box h3{ margin:0 0 8px 0 }
+.modal-box input, .modal-box select{
+  background:#12182b; border:1px solid var(--border);
+  border-radius:10px; padding:10px; color:var(--fg);
+}
+.modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:6px }
+
+/* ====== Assinatura (@richard.gms) ====== */
+.signature{
+  position:fixed; right:16px; bottom:14px;
+  z-index:999;
+  padding:6px 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(15,19,34,.78);
+  color:var(--muted);
+  font-size:12.5px;
+  letter-spacing:.2px;
+  backdrop-filter:blur(4px);
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+  transition:opacity .2s ease, transform .2s ease;
+}
+.signature b{ color:var(--fg); font-weight:600 }
+.signature code{ color:#32b1ff; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace }
+.signature:hover{ opacity:1; transform:translateY(-1px) }
+
+/* Em telas pequenas, a assinatura entra no fluxo e não cobre nada */
+@media (max-width:700px){
+  .signature{
+    position:static;
+    margin:15px auto 0;
+    display:inline-block;
+  }
+}
+
+/* ====== Responsivo principal ====== */
 @media (max-width:1100px){
   :root{ --gap:14px }
-  .wrap, .wrap.ingame {
-    grid-template-columns: 1fr;
+  .wrap, .wrap.ingame{
+    grid-template-columns:1fr;
     grid-template-areas:
       "hud"
       "ranking"
       "board";
   }
-  .ranking-centered{max-width:100%}
+  .ranking-centered{ max-width:100% }
 }
-/* Assinatura fixa (não atrapalha o jogo) */
-.signature{
-  position: fixed;
-  right: 16px;
-  bottom: 14px;
-  z-index: 999;
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: rgba(15,19,34,.78);
-  color: var(--muted);
-  font-size: 12.5px;
-  letter-spacing: .2px;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 4px 14px rgba(0,0,0,.25);
-  transition: opacity .2s ease, transform .2s ease;
-}
-.signature b{ color: var(--fg); font-weight: 600; }
-.signature code{ color:#32b1ff; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
-.signature:hover{ opacity: 1; transform: translateY(-1px); }
 
-/* Em telas pequenas, a assinatura vira bloco normal no fluxo */
-@media (max-width: 700px){
-  .signature{
-    position: static;
-    margin: 15px auto 0;
-    display: inline-block;
-  }
+/* Topbar “empilha” no mobile e os botões ocupam largura útil */
+@media (max-width:640px){
+  .topbar{ flex-direction:column; align-items:stretch }
+  .controls{ margin-left:0; width:100% }
+  .controls .btn{ flex:1 1 auto }
 }
+
+/* ====== Acessibilidade & Motion ====== */
+:focus-visible{ scroll-margin: 90px } /* foco não fica escondido */
+@media (prefers-reduced-motion: reduce){
+  .inner{ transition:none }
+  .btn{ transition:none }
+}
+
+/* Util */
+.muted{ color:var(--muted) }
+.hidden{ display:none !important }
