@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kanto Nerd — Jogo da Memória</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="theme-dark">
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logo_kanto.jpeg" class="logo" alt="Kanto Nerd" />
+      <div><h1>Kanto Nerd</h1><small>Jogo da Memória — Campeonato local</small></div>
+    </div>
+    <div class="controls">
+      <button id="start" class="btn primary">Iniciar jogo</button>
+      <button id="resetAll" class="btn">Resetar campeonato</button>
+    </div>
+  </header>
+
+  <div id="startModal" class="modal">
+    <div class="modal-box">
+      <h3>Começar partida</h3>
+      <label>Nome do jogador</label>
+      <input id="inpName" type="text" maxlength="24" placeholder="Seu nome..." />
+      <label>Dificuldade</label>
+      <select id="inpDiff">
+        <option value="easy">Fácil (4×4)</option>
+        <option value="medium" selected>Médio (5×4)</option>
+        <option value="hard">Difícil (6×4)</option>
+      </select>
+      <div class="modal-actions">
+        <button id="confirmStart" class="btn primary">Iniciar</button>
+        <button id="cancelStart" class="btn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section id="hud" class="hud" aria-live="polite" hidden>
+      <span id="hudName">Jogador: —</span>
+      <span id="hudDiff">Dificuldade: —</span>
+      <span id="hudTime">Tempo: 00:00</span>
+      <span id="hudMoves">Movimentos: 0</span>
+    </section>
+
+    <section class="ranking ranking-centered" id="rankingBox">
+      <h2>🏆 Ranking — Top 20</h2>
+      <table>
+        <thead>
+          <tr><th>#</th><th>Nome</th><th>Pontuação</th><th>Tempo</th><th>Mov</th><th>Dificuldade</th><th>Data</th></tr>
+        </thead>
+        <tbody id="lbBody"></tbody>
+      </table>
+      <p class="muted">A pontuação considera dificuldade, tempo e movimentos.</p>
+    </section>
+
+    <section id="boardWrap" class="board-wrap">
+      <div id="board" class="board" hidden></div>
+      <div id="win" class="win hidden">
+        <h2>Vitória!</h2>
+        <p id="winStats"></p>
+        <button id="playAgain" class="btn primary">Novo jogo</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">Imagens em <code>assets/icons</code>. Verso usa <code>assets/logo_kanto.jpeg</code>.</footer>
+  <script src="game.js"></script>
+  <div class="signature" aria-label="Assinatura do autor">
+  <span>Criado por <b>Richard Alex</b> — <code>@richard.gms</code></span>
+</div>
+</body>
+</html>
